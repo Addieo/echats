@@ -1,0 +1,337 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">  
+<html>  
+  <head>  
+  <meta charset="utf-8">  
+  
+      
+    <title>全国地图</title>  
+    <script type="text/javascript" src="js/jquery-1.9.1.min.js"></script>  
+    <script type="text/javascript" src="js/echarts/dist/echarts.js"></script>  
+    <script type="text/javascript" src="js/echarts/dist/echarts-all.js"></script>  
+    <script type="text/javascript" src="js/china-main-city/china-main-city-map.js"></script>   
+<script type="text/javascript">  
+    var province = [  
+                {name: '北京', selected:false},  
+                {name: '天津', selected:false},  
+                {name: '上海', selected:false},  
+                {name: '重庆', selected:false},  
+                {name: '河北', selected:false},  
+                {name: '河南', selected:false},  
+                {name: '云南', selected:false},  
+                {name: '辽宁', selected:false},  
+                {name: '黑龙江', selected:false},  
+                {name: '湖南', selected:false},  
+                {name: '安徽', selected:false},  
+                {name: '山东', selected:false},  
+                {name: '新疆', selected:false},  
+                {name: '江苏', selected:false},  
+                {name: '浙江', selected:false},  
+                {name: '江西', selected:false},  
+                {name: '湖北', selected:false},  
+                {name: '广西', selected:false},  
+                {name: '甘肃', selected:false},  
+                {name: '山西', selected:false},  
+                {name: '内蒙古', selected:false},  
+                {name: '陕西', selected:false},  
+                {name: '吉林', selected:false},  
+                {name: '福建', selected:false},  
+                {name: '贵州', selected:false},  
+                {name: '广东', selected:false},  
+                {name: '青海', selected:false},  
+                {name: '西藏', selected:false},  
+                {name: '四川', selected:false},  
+                {name: '宁夏', selected:false},  
+                {name: '海南', selected:false},  
+                {name: '台湾', selected:false},  
+                {name: '香港', selected:false},  
+                {name: '澳门', selected:false}  
+            ];  
+    var cityvalue;  
+    $(function(){  
+        var chart_1 ;  
+        var chart_2;  
+        require.config({  
+           paths: {  
+               echarts: 'js/echarts/dist'  
+           }  
+           });  
+           require(  
+           [  
+               'echarts',  
+               'echarts/theme/gray',//设置主题  
+               'echarts/chart/funnel',   // 按需加载所需图表，如需动态类型切换功能，别忘了同时加载相应图表  
+               'echarts/chart/map',  
+               'echarts/chart/treemap',  
+           ],   
+           function (ec) {  
+                      
+                 chart_1 = ec.init(document.getElementById('main_1'));  
+                 chart_2 = ec.init(document.getElementById('main_2'));  
+                 $.get('china-main-city/china.json', function (chinaJson) {  
+                        //echarts.registerMap('china', chinaJson);  
+                          
+                });  
+                var option_1 = {  
+                    tooltip : {  
+                        trigger: 'item'  
+                    },  
+                    toolbox: {  
+                        show : false,  
+                        orient: 'vertical',  
+                        x:'right',  
+                        y:'center',  
+                        feature : {  
+                            mark : {show: true},  
+                            dataView : {show: true, readOnly: false}  
+                        },  
+                    },  
+                    series : [  
+                        {  
+                            tooltip: {  
+                                trigger: 'item',  
+                                formatter: '{b}'  
+                            },  
+                            name: '选择器',  
+                            type: 'map',  
+                            mapType: 'china',  
+                            label: {  
+                                normal: {  
+                                    show: true  
+                                },  
+                                emphasis: {  
+                                    show: true  
+                                }  
+                            },  
+                            mapLocation: {  
+                                x: 'center',  
+                                y: 'top',  
+                                width: '100%'  
+                            },  
+                            roam: true,//设置地图的拖动的缩放  
+                            selectedMode : 'single',  
+                            itemStyle:{  
+                                emphasis:{label:{show:true}},  
+                                 normal: {  
+                                    borderWidth:1,  
+                                    borderColor:'white',  
+                                   // borderColor:'lightgreen',  
+                                  //color: 'grey',  
+                                    label: {  
+                                        show: true  
+                                    }  
+                                 },  
+                            },   
+                            data:province,  
+                           
+                        }  
+                    ],  
+                    animation: false  
+                     
+                };  
+                chart_1.setOption(option_1,true);    
+                chart_1.on('mapSelected', function (param){  
+                      
+                    var selected = param.selected;  
+                    var selectedProvince;  
+                    var name;  
+                    for (var i = 0, l = option_1.series[0].data.length; i < l; i++) {                  
+                        name = option_1.series[0].data[i].name;  
+                        option_1.series[0].data[i].selected = selected[name];  
+                        if (selected[name]) {  
+                            alert(name);  
+                            selectedProvince = name;  
+                        }  
+                    }  
+                    if (typeof selectedProvince == 'undefined') {  
+                            option_1.series.splice(1);  
+                            option_1.legend = null;  
+                            option_1.dataRange = null;  
+                            chart_1.setOption(option_1, true);  
+                            return;  
+                        }  
+  
+                        $("#main_2").show();  
+                        var option_2 = {  
+                            series:[{  
+                             name: '随机数据',  
+                            type: 'map',  
+                            mapType: selectedProvince,  
+                            itemStyle:{  
+                                normal:{label:{show:true},  
+                                    borderWidth:1,  
+                                     borderColor:'white',  
+                                },  
+                                emphasis:{label:{show:true}},  
+                              },   
+                            mapLocation: {  
+                                x: '35%'  
+                            },  
+                            roam: true,  
+                                data:[],  
+                            }],  
+                        };  
+                        chart_2.setOption(option_2,true);   
+                      
+                });  
+                chart_2.on('click',function(param){  
+                    //alert("param.selected:"+param.selected);  
+                   for(var c in cityMap){  
+                            if(c.indexOf(param.name)>=0){  
+                                cityvalue=cityMap[c]  ;   
+                            }  
+                        }  
+                      
+                        alert("cityvalue:"+cityvalue);  
+                        change(param.name,cityvalue,"none");//显示区县地图，传入第二个参数为json文件名称，第三个参数为‘none’  
+                        $("#city_hidden_0").attr("value",param.name);  
+                        $("#cityvalue_hidden_0").attr("value",cityvalue);  
+                          
+                });  
+      
+                      
+                    
+                  
+        }   
+      );   
+});  
+  
+//显示地图            
+function change(title,jsonname,maptype){  
+     //alert("titil:"+title+"  jsonname:"+jsonname+"          maptype:"+maptype);  
+    require.config({  
+           paths: {  
+               echarts: 'js/echarts/dist'  
+           }  
+       });  
+       require(  
+           [  
+               'echarts',  
+               'echarts/theme/gray',//设置主题  
+               'echarts/chart/funnel',   // 按需加载所需图表，如需动态类型切换功能，别忘了同时加载相应图表  
+               'echarts/chart/map',  
+               'echarts/chart/treemap',  
+           ],  
+           function (ec,theme) {  
+               myChart = ec.init(document.getElementById('main'),theme);  
+               if(maptype=="none"){  
+                    require('echarts/util/mapData/params').params.HD = {  
+                        getGeoJson: function (callback) {  
+                            $.getJSON('china-main-city/'+jsonname+'.json', callback);  
+                        }  
+                    };  
+                maptype='HD';  
+                }     
+  
+                 
+               option = {  
+                title:{  
+                    text:'PM2.5浓度日均值（ug/m3）',  
+                    x:'left',  
+                    y:470*24,  
+                    textStyle:{  
+                        fontSize: 14,  
+                        fontWeight:'bold'   
+                    }  
+                },  
+                tooltip : {  
+                    trigger: 'item'  
+                },  
+              
+                toolbox: {  
+                    show: true,  
+                    orient : 'vertical',  
+                    x: 'right',  
+                    y: 'bottom',  
+                    feature : {  
+                        saveAsImage : {show: true },  
+                          
+                    },  
+                    color :['rgba(0,0,0,0)']   
+                },  
+                series : [  
+                    {  
+                        name: title,  
+                        type: 'map',  
+                        mapType: maptype,  
+                        roam: true,  
+                        itemStyle:{  
+                            normal:{  
+                                label:{  
+                                    show:true,  
+                                    textStyle: {  
+                                        color: "rgb(49, 49, 49)"  
+                                    }  
+                                },  
+                                borderWidth:1,  
+                                borderColor:'white',  
+                                  
+                            },  
+                            emphasis:{label:{show:true}}  
+                        },  
+                        data:[],  
+                    },  
+                    {//指北针  
+                        type:'funnel',  
+                        width: '3%',  
+                        height: '10%',  
+                        sort : 'ascending',  
+                        legendHoverLink:false,  
+                        data:[  
+                            {value:20, name:'N'}  
+                        ]  
+                    },  
+                    {//比例尺  
+                        name:'0          20km        40km',  
+                        type:'treemap',  
+                        size:['13%', '2%'],  
+                        center:['90%','90%'],  
+                        itemStyle: {  
+                            normal: {  
+                                label: {  
+                                    show: true,  
+                                    formatter: "{b}"  
+                                },  
+                                borderWidth: 1  
+                            },  
+                            emphasis: {  
+                                label: {  
+                                    show: true  
+                                }  
+                            }  
+                        },  
+                        data:[  
+                            {  
+                                name: '20km',  
+                                value: 1  
+                            },  
+                            {  
+                                name: '40km',  
+                                value: 1  
+                            }  
+                        ]  
+                    }  
+                ]  
+            };  
+               
+               myChart.setOption(option);  
+           }  
+       );  
+}  
+  
+  
+</script>  
+      
+  
+  </head>  
+    
+  <body>  
+  <input type="hidden" id="city_hidden_0" ><!-- 放城市的值，以便于整个页面的js使用城市值 -->  
+  <input type="hidden" id="cityvalue_hidden_0"><!-- 放取城市地图的json名称，以便于整个页面的js都可以使用这个值 -->  
+  <div style="height: 300px;width: 900px;">  
+  <div id="main_1"style="height:300px;border:0px solid #ccc;padding:0px;width: 450px;float: left;"> </div>    
+   
+   <div id="main_2" style="height:300px;border:0px solid #ccc;padding:0px; width: 450px;float: right;"></div>  
+   <div id="main" style="height:300px;border:0px solid #ccc;padding:0px; width: 450px;">hahahhahahahhah</div>  
+  </div>  
+  </body>  
+</html>  
